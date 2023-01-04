@@ -3,6 +3,10 @@
 
 fastapi
 
+`pip3 install fastapi[all]`
+
+
+
 新建main.py
 
 ```python
