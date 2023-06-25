@@ -3,6 +3,8 @@
 
 https://github.com/AUTOMATIC1111/stable-diffusion-webui/
 
+https://gitee.com/aron0524/stable-diffusion-webui/
+
 
 ## sd-webui-roop
 
@@ -10,7 +12,7 @@ https://github.com/AUTOMATIC1111/stable-diffusion-webui/
 
 https://github.com/s0md3v/sd-webui-roop
 
-
+https://gitee.com/aron0524/sd-webui-roop
 
 
 
