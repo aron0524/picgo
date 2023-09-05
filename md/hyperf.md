@@ -1,26 +1,35 @@
 # Hyperf3
 ## Nginx配置
 
-
+HTTPS
 
 ```php
 
 upstream hyperf {
     # Hyperf HTTP Server 的 IP 及 端口
+    #server 127.0.0.1:19999;
     server 127.0.0.1:9501;
-    #server 127.0.0.1:9502;
 }
 server
 {
     listen 80;
-    # listen 9501;
-    server_name hyperf3.test;
-    #autoindex on;
+	listen 443 ssl http2;
+    server_name hyperf3.test api.tizi.love;
     index index.php index.html index.htm default.php default.htm default.html;
-    root /www/wwwroot/hyperf3.test;
+    root /www/server/stop;
 
     #SSL-START SSL相关配置，请勿删除或修改下一行带注释的404规则
     #error_page 404/404.html;
+    ssl_certificate    /www/server/panel/vhost/cert/hyperf3.test/fullchain.pem;
+    ssl_certificate_key    /www/server/panel/vhost/cert/hyperf3.test/privkey.pem;
+    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    add_header Strict-Transport-Security "max-age=31536000";
+    error_page 497  https://$host$request_uri;
+
     #SSL-END
 
     #ERROR-PAGE-START  错误页配置，可以注释、删除或修改
@@ -29,11 +38,11 @@ server
     #ERROR-PAGE-END
 
     #PHP-INFO-START  PHP引用配置，可以注释或修改
-    include enable-php-80.conf;
+    #include enable-php-81.conf;
     #PHP-INFO-END
 
     #REWRITE-START URL重写规则引用,修改后将导致面板设置的伪静态规则失效
-    include /www/server/panel/vhost/rewrite/hyperf3.test.conf;
+    #include /www/server/panel/vhost/rewrite/hyperf3.test.conf;
     #REWRITE-END
 
     #禁止访问的文件或目录
@@ -64,36 +73,38 @@ server
     #     expires      12h;
     #     error_log /dev/null;
     #     access_log /dev/null;
+    # }javascript:;
+    
+    # location /apidoc {
+    #     root "/www/wwwroot/hyperf3.test/public/";
+    #     break;
     # }
+    location /apidoc {
+        root "/www/wwwroot/hyperf3.test/public/";
+        if (!-e $request_filename){
+            proxy_pass http://127.0.0.1:9501;  
+            break;
+        }
+        break;
+    }
+    location /static {
+        root "/www/wwwroot/hyperf3.test/public/";
+        break;
+    }
+    
     location / {
         # 将客户端的 Host 和 IP 信息一并转发到对应节点  
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
         # 转发Cookie，设置 SameSite
         proxy_cookie_path / "/; secure; HttpOnly; SameSite=strict";
         # 执行代理访问真实服务器
         proxy_pass http://hyperf;
     }
-    location /apidoc/{
-        # proxy_next_upstream http_502 http_504 error timeout invalid_header;  
-        # proxy_pass http://127.0.0.1:9501;  
-        # proxy_set_header Host 127.0.0.1;  
-        # proxy_set_header X-Forwarded-For $remote_addr;  
-        # break;
-        root "/www/wwwroot/hyperf3.test/public/";
-        break;
-    }
-    location /static/{
-        root "/www/wwwroot/hyperf3.test/public/";
-        break;
-    }
-
-    access_log  /www/wwwlogs/hyperf3.test.log;
+    access_log  /dev/null;
     error_log  /www/wwwlogs/hyperf3.test.error.log;
 }
-
 ```
 
 
